@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
-	"github.com/timoteoBone/final-project-microservice/grpc-service/entities"
+	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
 	errs "github.com/timoteoBone/project-microservice/httpService/pkg/errors"
 )
 

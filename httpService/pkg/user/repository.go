@@ -2,12 +2,13 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
-	"github.com/timoteoBone/final-project-microservice/grpc-service/entities"
+	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
 
-	proto "github.com/timoteoBone/final-project-microservice/grpc-service/pb"
+	proto "github.com/timoteoBone/project-microservice/grpcService/pkg/pb"
 	"google.golang.org/grpc"
 )
 
@@ -58,10 +59,13 @@ func (repo *grpcClient) GetUser(ctx context.Context, rq entities.GetUserRequest)
 	protoReq := proto.GetUserRequest{User_Id: rq.UserID}
 
 	protoRes, err := client.GetUser(ctx, &protoReq)
+	fmt.Println("hasta 1")
 	if err != nil {
 		level.Error(logger).Log("error", err.Error())
 		return entities.GetUserResponse{}, err
 	}
+
+	fmt.Println("hasta 2")
 
 	resp := entities.GetUserResponse{
 		Name: protoRes.Name,

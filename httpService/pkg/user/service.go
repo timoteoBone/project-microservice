@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/timoteoBone/final-project-microservice/grpc-service/entities"
+	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
 )
 
 type Repository interface {

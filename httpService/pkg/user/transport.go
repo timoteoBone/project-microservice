@@ -7,8 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/timoteoBone/final-project-microservice/grpc-service/entities"
-	"github.com/timoteoBone/final-project-microservice/http-service/util"
+	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
 	myerr "github.com/timoteoBone/project-microservice/httpService/pkg/errors"
 
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -17,13 +16,13 @@ import (
 func NewHTTPSrv(endpoint Endpoints) http.Handler {
 	rt := mux.NewRouter()
 
-	rt.Methods("POST").Path("/api/createUs").Handler(httptransport.NewServer(
+	rt.Methods("POST").Path("/user").Handler(httptransport.NewServer(
 		endpoint.CreateUs,
 		decodeCreateUserReq,
 		encodeCreateUserResp,
 	))
 
-	rt.Methods("GET").Path("/api/getUs/{id}").Handler(httptransport.NewServer(
+	rt.Methods("GET").Path("/user/{id}").Handler(httptransport.NewServer(
 		endpoint.GetUs,
 		decodeGetUserReq,
 		encodeGetUserResp,
@@ -38,16 +37,6 @@ func decodeCreateUserReq(ctx context.Context, r *http.Request) (interface{}, err
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		return nil, myerr.ErrInvalidDataForm
-	}
-
-	valid := util.ValidateCreateUserRequest(request)
-	if valid != nil {
-		return nil, err
-	}
-
-	request.Pass, err = util.HashPassword(request.Pass)
-	if err != nil {
-		return nil, err
 	}
 
 	return request, nil
