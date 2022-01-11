@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/timoteoBone/final-project-microservice/grpc-service/entities"
-	errs "github.com/timoteoBone/project-microservice/httpService/pkg/user/errors"
+	errs "github.com/timoteoBone/project-microservice/httpService/pkg/errors"
 )
 
 type Service interface {

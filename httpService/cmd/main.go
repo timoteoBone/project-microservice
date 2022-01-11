@@ -10,10 +10,8 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/timoteoBone/final-project-microservice/http-service/endpoints"
-	"github.com/timoteoBone/final-project-microservice/http-service/repository"
-	"github.com/timoteoBone/final-project-microservice/http-service/service"
-	tr "github.com/timoteoBone/final-project-microservice/http-service/transport"
+	"github.com/timoteoBone/project-microservice/httpService/pkg/user"
+
 	"google.golang.org/grpc"
 )
 
@@ -55,11 +53,11 @@ func main() {
 		level.Error(logger).Log(err)
 	}
 
-	repo := repository.NewgRPClient(logger, grpcServerConnection)
+	repo := user.NewgRPClient(logger, grpcServerConnection)
 
-	srvc := service.NewService(repo, logger)
+	srvc := user.NewService(repo, logger)
 
-	endpoint := endpoints.MakeEndpoints(srvc)
+	endpoint := user.MakeEndpoints(srvc)
 
 	errs := make(chan error)
 
@@ -70,7 +68,7 @@ func main() {
 	}()
 
 	go func() {
-		httpHandler := tr.NewHTTPSrv(*endpoint)
+		httpHandler := user.NewHTTPSrv(*endpoint)
 		level.Info(logger).Log("Listening to", httpAddr)
 		errs <- http.ListenAndServe(*httpAddr, httpHandler)
 	}()

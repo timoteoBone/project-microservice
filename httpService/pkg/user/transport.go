@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/timoteoBone/final-project-microservice/grpc-service/entities"
 	"github.com/timoteoBone/final-project-microservice/http-service/util"
-	myerr "github.com/timoteoBone/project-microservice/httpService/pkg/user/errors"
+	myerr "github.com/timoteoBone/project-microservice/httpService/pkg/errors"
 
 	httptransport "github.com/go-kit/kit/transport/http"
 )
