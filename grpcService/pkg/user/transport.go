@@ -7,8 +7,8 @@ import (
 
 	gr "github.com/go-kit/kit/transport/grpc"
 
-	"github.com/timoteoBone/final-project-microservice/grpc-service/entities"
-	proto "github.com/timoteoBone/final-project-microservice/grpc-service/pb"
+	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
+	proto "github.com/timoteoBone/project-microservice/grpcService/pkg/pb"
 )
 
 type gRPCSv struct {
@@ -42,7 +42,6 @@ func (g *gRPCSv) CreateUser(ctx context.Context, rq *proto.CreateUserRequest) (r
 	}
 
 	return resp.(*proto.CreateUserResponse), nil
-
 }
 
 func (g *gRPCSv) GetUser(ctx context.Context, rq *proto.GetUserRequest) (rs *proto.GetUserResponse, err error) {

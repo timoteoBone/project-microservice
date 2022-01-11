@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	entities "github.com/timoteoBone/final-project-microservice/grpc-service/entities"
-	mapper "github.com/timoteoBone/final-project-microservice/grpc-service/mapper"
+	entities "github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
+	mapper "github.com/timoteoBone/project-microservice/grpcService/pkg/mapper"
 )
 
 type Repository interface {

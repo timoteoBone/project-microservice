@@ -7,6 +7,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	entities "github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
+	"github.com/timoteoBone/project-microservice/grpcService/pkg/utils"
 )
 
 type sqlRepo struct {
@@ -20,7 +21,7 @@ func NewSQL(db *sql.DB, log log.Logger) *sqlRepo {
 
 func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (int64, error) {
 
-	stmt, err := repo.DB.Prepare("INSERT INTO USER (first_name, age, pass) VALUES(?,?,?)")
+	stmt, err := repo.DB.Prepare(utils.CreateUser)
 	if err != nil {
 		return 0, err
 	}
@@ -42,7 +43,7 @@ func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (int64,
 
 func (repo *sqlRepo) GetUser(ctx context.Context, userId int64) (entities.User, error) {
 
-	stmt, err := repo.DB.Query("SELECT first_name, age FROM USER WHERE id = ?", userId)
+	stmt, err := repo.DB.Query(utils.GetUser, userId)
 	if err != nil {
 		return entities.User{}, err
 	}
