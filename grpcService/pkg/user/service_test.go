@@ -190,3 +190,7 @@ func TestServiceGetUser(t *testing.T) {
 	}
 
 }
+
+func TestAuthenticateUser(t *testing.T) {
+
+}
