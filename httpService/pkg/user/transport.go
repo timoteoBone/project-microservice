@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
@@ -54,12 +53,7 @@ func decodeGetUserReq(ctx context.Context, r *http.Request) (interface{}, error)
 		return nil, myerr.ErrInvalidDataForm
 	}
 
-	num, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return nil, myerr.ErrInvalidDataForm
-	}
-
-	request.UserID = num
+	request.UserID = id
 	return request, nil
 }
 

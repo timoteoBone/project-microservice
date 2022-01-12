@@ -46,6 +46,7 @@ func (repo *grpcClient) CreateUser(ctx context.Context, rq entities.CreateUserRe
 		Status: status,
 		UserId: resp.User_Id,
 	}
+	fmt.Println(res.UserId)
 
 	return res, nil
 
