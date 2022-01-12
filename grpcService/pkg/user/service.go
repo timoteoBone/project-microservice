@@ -10,8 +10,8 @@ import (
 )
 
 type Repository interface {
-	GetUser(ctx context.Context, userId int64) (entities.User, error)
-	CreateUser(ctx context.Context, user entities.User) (int64, error)
+	GetUser(ctx context.Context, userId string) (entities.User, error)
+	CreateUser(ctx context.Context, user entities.User) (string, error)
 }
 
 type service struct {

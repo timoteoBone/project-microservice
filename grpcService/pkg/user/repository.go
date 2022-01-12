@@ -19,29 +19,30 @@ func NewSQL(db *sql.DB, log log.Logger) *sqlRepo {
 	return &sqlRepo{db, log}
 }
 
-func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (int64, error) {
+func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (string, error) {
+
+	repo.Logger.Log(repo.Logger, "Repository method", "Create user")
 
 	stmt, err := repo.DB.Prepare(utils.CreateUser)
 	if err != nil {
-		return 0, err
+		level.Error(repo.Logger).Log(err)
+		return "", err
 	}
 
-	res, err := stmt.Exec(user.Name, user.Age, user.Pass)
+	newId := utils.GenerateId()
+
+	res, err := stmt.Exec(user.Name, newId, user.Age, user.Pass)
 	if err != nil {
-		return 0, err
+		level.Error(repo.Logger).Log(err)
+		return "", err
 	}
 
-	userId, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
+	repo.Logger.Log(repo.Logger, res, "rows affected")
 
-	repo.Logger.Log(res, "rows affected")
-
-	return userId, nil
+	return newId, nil
 }
 
-func (repo *sqlRepo) GetUser(ctx context.Context, userId int64) (entities.User, error) {
+func (repo *sqlRepo) GetUser(ctx context.Context, userId string) (entities.User, error) {
 
 	stmt, err := repo.DB.Query(utils.GetUser, userId)
 	if err != nil {

@@ -12,15 +12,15 @@ type CreateUserRequest struct {
 
 type CreateUserResponse struct {
 	Status Status
-	UserId int64
+	UserId string
 }
 
 type GetUserRequest struct {
-	UserID int64
+	UserID string
 }
 
 type GetUserResponse struct {
 	Name string
-	Id   int64
+	Id   string
 	Age  uint32
 }

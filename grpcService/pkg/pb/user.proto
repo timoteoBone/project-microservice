@@ -10,7 +10,7 @@ message Status{
 
 message User{
     string Name = 1;
-    int64 Id = 2;
+    int32 Id = 2;
     string Pass = 3;
     uint32 Age = 4;
 }
@@ -22,17 +22,17 @@ message CreateUserRequest{
 }
 
 message CreateUserResponse{
-    int64 User_Id = 1;
+    string User_Id = 1;
     Status status = 2;
 }
 
 message GetUserRequest{
-    int64 User_Id = 1;
+    string User_Id = 1;
 }
 
 message GetUserResponse{
     string Name = 1;
-    int64 Id = 2;
+    string Id = 2;
     uint32 Age = 4;
 }
 
