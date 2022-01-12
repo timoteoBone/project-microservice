@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -46,6 +47,7 @@ func (repo *sqlRepo) GetUser(ctx context.Context, userId string) (entities.User,
 
 	stmt, err := repo.DB.Query(utils.GetUser, userId)
 	if err != nil {
+		fmt.Println("no user")
 		return entities.User{}, err
 	}
 

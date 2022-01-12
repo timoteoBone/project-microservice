@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kit/kit/log"
 
@@ -37,6 +38,7 @@ func (s *service) CreateUser(ctx context.Context, userReq entities.CreateUserReq
 		response.Status = status
 		return response, err
 	}
+	fmt.Println(genId)
 
 	status.Message = "created successfully"
 	response.Status = status

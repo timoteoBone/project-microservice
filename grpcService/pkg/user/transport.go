@@ -71,6 +71,7 @@ func decodeCreateUserRequest(ctx context.Context, request interface{}) (interfac
 
 func encodeCreateUserResponse(ctx context.Context, response interface{}) (interface{}, error) {
 	res := response.(entities.CreateUserResponse)
+	fmt.Println(res.UserId)
 	status := &proto.Status{Message: res.Status.Message}
 	protoResp := &proto.CreateUserResponse{User_Id: res.UserId, Status: status}
 	fmt.Println(res.UserId)
