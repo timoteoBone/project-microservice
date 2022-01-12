@@ -40,10 +40,6 @@ func (repo *RepoSitoryMock) GetUser(ctx context.Context, userId string) (entitie
 	args := repo.Called(ctx, userId)
 	id := args[0]
 
-	if id == nil {
-		return entities.User{}, args.Error(1)
-	}
-
 	return id.(entities.User), nil
 
 }

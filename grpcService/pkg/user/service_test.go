@@ -176,6 +176,17 @@ func TestServiceGetUser(t *testing.T) {
 			ServiceExpectedResponse: correctGetUserResponse,
 			Error:                   nil,
 		},
+
+		{
+			Name:                    "Get User Not Found",
+			Identifier:              "GetUser",
+			UserId:                  userId,
+			Request:                 correctGetUserRequest,
+			RepoReturn:              entities.User{},
+			RepoError:               errors.ErrUserNotFound,
+			ServiceExpectedResponse: entities.GetUserResponse{},
+			Error:                   errors.ErrUserNotFound,
+		},
 	}
 
 	for _, tc := range testCases {

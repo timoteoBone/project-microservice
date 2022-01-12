@@ -45,18 +45,12 @@ func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (string
 
 func (repo *sqlRepo) GetUser(ctx context.Context, userId string) (entities.User, error) {
 
-	stmt, err := repo.DB.Query(utils.GetUser, userId)
+	user := entities.User{}
+	err := repo.DB.QueryRow(utils.GetUser, userId).Scan(&user.Name, &user.Age)
 	if err != nil {
 		fmt.Println("no user")
 		return entities.User{}, err
 	}
 
-	user := entities.User{}
-	for stmt.Next() {
-		err := stmt.Scan(&user.Name, &user.Age)
-		if err != nil {
-			level.Error(repo.Logger).Log("error")
-		}
-	}
 	return user, nil
 }

@@ -2,11 +2,13 @@ package user
 
 import (
 	"context"
-	"fmt"
+
+	"database/sql"
 
 	"github.com/go-kit/kit/log"
 
 	entities "github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
+	errors "github.com/timoteoBone/project-microservice/grpcService/pkg/errors"
 	mapper "github.com/timoteoBone/project-microservice/grpcService/pkg/mapper"
 )
 
@@ -38,7 +40,6 @@ func (s *service) CreateUser(ctx context.Context, userReq entities.CreateUserReq
 		response.Status = status
 		return response, err
 	}
-	fmt.Println(genId)
 
 	status.Message = "created successfully"
 	response.Status = status
@@ -52,6 +53,9 @@ func (s *service) GetUser(ctx context.Context, user entities.GetUserRequest) (en
 
 	res, err := s.Repo.GetUser(ctx, user.UserID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return entities.GetUserResponse{}, errors.ErrUserNotFound
+		}
 		return entities.GetUserResponse{}, err
 	}
 

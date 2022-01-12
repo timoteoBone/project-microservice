@@ -45,8 +45,10 @@ func (g *gRPCSv) CreateUser(ctx context.Context, rq *proto.CreateUserRequest) (r
 }
 
 func (g *gRPCSv) GetUser(ctx context.Context, rq *proto.GetUserRequest) (rs *proto.GetUserResponse, err error) {
-	_, resp, err := g.getUs.ServeGRPC(ctx, rq)
+	fmt.Println("err")
 
+	_, resp, err := g.getUs.ServeGRPC(ctx, rq)
+	fmt.Println(err)
 	if err != nil {
 		return nil, err
 	}
