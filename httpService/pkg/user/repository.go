@@ -60,13 +60,11 @@ func (repo *grpcClient) GetUser(ctx context.Context, rq entities.GetUserRequest)
 	protoReq := proto.GetUserRequest{User_Id: rq.UserID}
 
 	protoRes, err := client.GetUser(ctx, &protoReq)
-	fmt.Println("hasta 1")
+
 	if err != nil {
 		level.Error(logger).Log("error", err.Error())
 		return entities.GetUserResponse{}, err
 	}
-
-	fmt.Println("hasta 2")
 
 	resp := entities.GetUserResponse{
 		Name: protoRes.Name,
