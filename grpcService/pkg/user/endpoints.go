@@ -10,17 +10,20 @@ import (
 type Service interface {
 	GetUser(ctx context.Context, userReq entities.GetUserRequest) (entities.GetUserResponse, error)
 	CreateUser(ctx context.Context, userReq entities.CreateUserRequest) (entities.CreateUserResponse, error)
+	AuthenticateUser(ctx context.Context, userReq entities.AuthenticateRequest) (entities.AuthenticateResponse, error)
 }
 
 type Endpoints struct {
-	CreateUser endpoint.Endpoint
-	GetUser    endpoint.Endpoint
+	CreateUser       endpoint.Endpoint
+	GetUser          endpoint.Endpoint
+	AuthenticateUser endpoint.Endpoint
 }
 
 func MakeEndpoint(s Service) Endpoints {
 	return Endpoints{
-		CreateUser: MakeCreateUserEndpoint(s),
-		GetUser:    MakeGetUserEndpoint(s),
+		CreateUser:       MakeCreateUserEndpoint(s),
+		GetUser:          MakeGetUserEndpoint(s),
+		AuthenticateUser: MakeAuthenticateUserEndpoint(s),
 	}
 }
 
@@ -48,5 +51,17 @@ func MakeGetUserEndpoint(s Service) endpoint.Endpoint {
 		}
 		return c, nil
 
+	}
+}
+
+func MakeAuthenticateUserEndpoint(s Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(entities.AuthenticateRequest)
+		resp, err := s.AuthenticateUser(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+
+		return resp, nil
 	}
 }

@@ -2,8 +2,6 @@ package user
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	gr "github.com/go-kit/kit/transport/grpc"
 
@@ -34,7 +32,11 @@ func NewGrpcServer(end Endpoints) proto.UserServiceServer {
 			encodeGetUserResponse,
 		),
 
-		authUs: gr.NewServer(),
+		authUs: gr.NewServer(
+			end.AuthenticateUser,
+			decodeAuthenticateRequest,
+			encodeAuthenticateResponse,
+		),
 	}
 }
 
@@ -44,29 +46,41 @@ func (g *gRPCSv) CreateUser(ctx context.Context, rq *proto.CreateUserRequest) (r
 	if err != nil {
 		status := customErr.CustomToGrpc(err)
 		resp := proto.CreateUserResponse{Status: status}
-		return &resp, nil
+		return &resp, err
 	}
 
 	return resp.(*proto.CreateUserResponse), nil
 }
 
 func (g *gRPCSv) GetUser(ctx context.Context, rq *proto.GetUserRequest) (rs *proto.GetUserResponse, err error) {
-	fmt.Println("err")
-
 	_, resp, err := g.getUs.ServeGRPC(ctx, rq)
-	fmt.Println(err)
+
 	if err != nil {
-		return nil, err
+		status := customErr.CustomToGrpc(err)
+		resp := proto.GetUserResponse{Status: status}
+		return &resp, err
 	}
 
 	return resp.(*proto.GetUserResponse), nil
+}
+
+func (g *gRPCSv) Authenticate(ctx context.Context, rq *proto.AuthenticateRequest) (*proto.AuthenticateResponse, error) {
+	_, resp, err := g.authUs.ServeGRPC(ctx, rq)
+
+	if err != nil {
+		status := customErr.CustomToGrpc(err)
+		resp := &proto.AuthenticateResponse{Status: status}
+		return resp, err
+	}
+
+	return resp.(*proto.AuthenticateResponse), nil
 }
 
 func decodeCreateUserRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	res, err := request.(*proto.CreateUserRequest)
 
 	if !err {
-		return nil, errors.New("Unable to decode request")
+		return nil, customErr.NewGrpcError()
 	}
 
 	return entities.CreateUserRequest{
@@ -88,7 +102,7 @@ func decodeGetUserRequest(ctx context.Context, request interface{}) (interface{}
 	res, err := request.(*proto.GetUserRequest)
 
 	if !err {
-		return nil, errors.New("Unable to decode request")
+		return nil, customErr.NewGrpcError()
 	}
 
 	return entities.GetUserRequest{
@@ -101,4 +115,29 @@ func encodeGetUserResponse(ctx context.Context, response interface{}) (interface
 	res := response.(entities.GetUserResponse)
 	protoResp := &proto.GetUserResponse{Id: res.Id, Name: res.Name, Age: res.Age}
 	return protoResp, nil
+}
+
+func decodeAuthenticateRequest(ctx context.Context, rq interface{}) (interface{}, error) {
+	req, err := rq.(*proto.AuthenticateRequest)
+
+	if !err {
+		return nil, customErr.NewGrpcError()
+	}
+
+	return entities.AuthenticateRequest{
+		Email: req.Email,
+		Pass:  req.Pass,
+	}, nil
+
+}
+
+func encodeAuthenticateResponse(ctx context.Context, response interface{}) (interface{}, error) {
+	resp := response.(entities.AuthenticateResponse)
+
+	status := proto.Status{Message: resp.Status.Message, Code: resp.Status.Code}
+
+	protoResp := *&proto.AuthenticateResponse{Status: &status}
+
+	return protoResp, nil
+
 }

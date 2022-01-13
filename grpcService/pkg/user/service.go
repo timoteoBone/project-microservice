@@ -6,15 +6,18 @@ import (
 	"database/sql"
 
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 
 	entities "github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
 	errors "github.com/timoteoBone/project-microservice/grpcService/pkg/errors"
 	mapper "github.com/timoteoBone/project-microservice/grpcService/pkg/mapper"
+	"github.com/timoteoBone/project-microservice/grpcService/pkg/utils"
 )
 
 type Repository interface {
 	GetUser(ctx context.Context, userId string) (entities.User, error)
 	CreateUser(ctx context.Context, user entities.User) (string, error)
+	AuthenticateUser(ctx context.Context, email string) (string, error)
 }
 
 type service struct {
@@ -67,4 +70,26 @@ func (s *service) GetUser(ctx context.Context, user entities.GetUserRequest) (en
 	}
 
 	return response, nil
+}
+
+func (s *service) AuthenticateUser(ctx context.Context, rq entities.AuthenticateRequest) (entities.AuthenticateResponse, error) {
+	s.Logger.Log(s.Logger, "request", "authenticate user", "recevied")
+
+	res, err := s.Repo.AuthenticateUser(ctx, rq.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			level.Error(s.Logger).Log(err, "sql error")
+			return entities.AuthenticateResponse{}, errors.NewUserNotFound()
+		}
+		return entities.AuthenticateResponse{}, err
+	}
+
+	validation := utils.CheckPassword(rq.Pass, res)
+	if validation != nil {
+		return entities.AuthenticateResponse{}, errors.NewDeniedAuthentication()
+	}
+
+	resp := entities.AuthenticateResponse{Status: entities.Status{Message: "authenticated succesfully", Code: 0}}
+
+	return resp, nil
 }

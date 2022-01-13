@@ -22,8 +22,18 @@ type GetUserRequest struct {
 }
 
 type GetUserResponse struct {
-	Name  string
-	Id    string
-	Age   uint32
+	Name   string
+	Id     string
+	Age    uint32
+	Email  string
+	Status Status
+}
+
+type AuthenticateRequest struct {
 	Email string
+	Pass  string
+}
+
+type AuthenticateResponse struct {
+	Status Status
 }

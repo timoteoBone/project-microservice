@@ -38,6 +38,7 @@ message GetUserResponse{
     string Id = 2;
     uint32 Age = 4;
     string Email = 5;
+    Status status = 6;
 }
 
 message AuthenticateRequest{
