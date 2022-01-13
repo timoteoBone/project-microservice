@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	gr "github.com/go-kit/kit/transport/grpc"
 
@@ -53,12 +54,11 @@ func (g *gRPCSv) CreateUser(ctx context.Context, rq *proto.CreateUserRequest) (r
 }
 
 func (g *gRPCSv) GetUser(ctx context.Context, rq *proto.GetUserRequest) (rs *proto.GetUserResponse, err error) {
+	fmt.Println("from getUserbeforeserve")
 	_, resp, err := g.getUs.ServeGRPC(ctx, rq)
 
 	if err != nil {
-		status := customErr.CustomToGrpc(err)
-		resp := proto.GetUserResponse{Status: status}
-		return &resp, err
+		return nil, err
 	}
 
 	return resp.(*proto.GetUserResponse), nil

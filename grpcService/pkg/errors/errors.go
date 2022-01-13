@@ -106,18 +106,18 @@ func CustomToGrpc(err error) *pb.Status {
 	return &status
 }
 
-func GrpcToCustom(code int32) error {
+func GrpcToCustom(code status.Status) error {
 	var err error
-	switch code {
-	case 3:
+	switch code.Code() {
+	case codes.InvalidArgument:
 		err = NewFieldsMissing()
-	case 5:
+	case codes.NotFound:
 		err = NewUserNotFound()
-	case 16:
+	case codes.PermissionDenied:
 		err = NewDeniedAuthentication()
-	case 2:
+	case codes.Unknown:
 		err = NewGrpcError()
-	case 10:
+	case codes.Aborted:
 		err = NewDataBaseError()
 	}
 	return err
