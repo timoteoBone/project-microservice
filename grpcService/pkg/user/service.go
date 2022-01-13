@@ -37,8 +37,9 @@ func (s *service) CreateUser(ctx context.Context, userReq entities.CreateUserReq
 
 	if err != nil {
 		status.Message = "Unable to create user"
+		status.Code = 10
 		response.Status = status
-		return response, err
+		return response, errors.NewDataBaseError()
 	}
 
 	status.Message = "created successfully"
@@ -54,7 +55,7 @@ func (s *service) GetUser(ctx context.Context, user entities.GetUserRequest) (en
 	res, err := s.Repo.GetUser(ctx, user.UserID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return entities.GetUserResponse{}, errors.ErrUserNotFound
+			return entities.GetUserResponse{}, errors.NewUserNotFound()
 		}
 		return entities.GetUserResponse{}, err
 	}

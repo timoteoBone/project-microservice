@@ -1,10 +1,11 @@
 syntax = "proto3";
 
-option go_package = "github.com/timoteoBone/final-project-microservice/grpc-service;grpc_service";
+option go_package = "github.com/timoteoBone/project-microservice/grpcService;grpc_service";
 
 package proto;
 
 message Status{
+    int32 Code = 1;
     string Message = 2;
 }
 
@@ -13,12 +14,14 @@ message User{
     int32 Id = 2;
     string Pass = 3;
     uint32 Age = 4;
+    string Email = 5;
 }
 
 message CreateUserRequest{
     string Name = 1;
     string Pass = 3;
     uint32 Age = 4;
+    string Email = 5;
 }
 
 message CreateUserResponse{
@@ -34,9 +37,20 @@ message GetUserResponse{
     string Name = 1;
     string Id = 2;
     uint32 Age = 4;
+    string Email = 5;
+}
+
+message AuthenticateRequest{
+    string Email = 1;
+    string Pass = 2;
+}
+
+message AuthenticateResponse{
+    Status status = 1;
 }
 
 service UserService{
     rpc CreateUser(CreateUserRequest) returns (CreateUserResponse){}
     rpc GetUser(GetUserRequest) returns (GetUserResponse){}
+    rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse){}
 }

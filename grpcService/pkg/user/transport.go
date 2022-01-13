@@ -8,12 +8,14 @@ import (
 	gr "github.com/go-kit/kit/transport/grpc"
 
 	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
+	customErr "github.com/timoteoBone/project-microservice/grpcService/pkg/errors"
 	proto "github.com/timoteoBone/project-microservice/grpcService/pkg/pb"
 )
 
 type gRPCSv struct {
 	createUs gr.Handler
 	getUs    gr.Handler
+	authUs   gr.Handler
 	proto.UnimplementedUserServiceServer
 }
 
@@ -31,6 +33,8 @@ func NewGrpcServer(end Endpoints) proto.UserServiceServer {
 			decodeGetUserRequest,
 			encodeGetUserResponse,
 		),
+
+		authUs: gr.NewServer(),
 	}
 }
 
@@ -38,7 +42,9 @@ func (g *gRPCSv) CreateUser(ctx context.Context, rq *proto.CreateUserRequest) (r
 	_, resp, err := g.createUs.ServeGRPC(ctx, rq)
 
 	if err != nil {
-		return nil, err
+		status := customErr.CustomToGrpc(err)
+		resp := proto.CreateUserResponse{Status: status}
+		return &resp, nil
 	}
 
 	return resp.(*proto.CreateUserResponse), nil
@@ -73,11 +79,8 @@ func decodeCreateUserRequest(ctx context.Context, request interface{}) (interfac
 
 func encodeCreateUserResponse(ctx context.Context, response interface{}) (interface{}, error) {
 	res := response.(entities.CreateUserResponse)
-	fmt.Println(res.UserId)
-	status := &proto.Status{Message: res.Status.Message}
+	status := &proto.Status{Message: res.Status.Message, Code: res.Status.Code}
 	protoResp := &proto.CreateUserResponse{User_Id: res.UserId, Status: status}
-	fmt.Println(res.UserId)
-
 	return protoResp, nil
 }
 

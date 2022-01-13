@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
@@ -30,7 +29,6 @@ func MakeCreateUserEndpoint(s Service) endpoint.Endpoint {
 
 		req := request.(entities.CreateUserRequest)
 		c, err := s.CreateUser(ctx, req)
-		fmt.Println(c.UserId)
 		if err != nil {
 			return nil, err
 		}
