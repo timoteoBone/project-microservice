@@ -52,3 +52,19 @@ func (repo *sqlRepo) GetUser(ctx context.Context, userId string) (entities.User,
 
 	return user, nil
 }
+
+func (repo *sqlRepo) AuthenticateUser(ctx context.Context, email string) (string, error) {
+
+	stmt, err := repo.DB.Prepare(utils.GetPassword)
+	if err != nil {
+		return "", err
+	}
+
+	var password string
+	err = stmt.QueryRow(email).Scan(password)
+	if err != nil {
+		return "", err
+	}
+
+	return password, nil
+}
