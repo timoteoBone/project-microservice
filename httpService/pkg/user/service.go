@@ -6,7 +6,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
-	"github.com/timoteoBone/project-microservice/grpcService/pkg/errors"
+	//"github.com/timoteoBone/project-microservice/grpcService/pkg/errors"
 )
 
 type Repository interface {
@@ -45,7 +45,6 @@ func (s *service) GetUser(ctx context.Context, rq entities.GetUserRequest) (enti
 	res, err := s.Repo.GetUser(ctx, rq)
 	if err != nil {
 		level.Error(logger).Log("error", err.Error())
-		err = errors.GrpcToCustom()
 		return entities.GetUserResponse{}, err
 	}
 
