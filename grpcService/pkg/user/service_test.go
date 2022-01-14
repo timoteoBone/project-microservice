@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
 	"github.com/timoteoBone/project-microservice/grpcService/pkg/errors"
-	err "github.com/timoteoBone/project-microservice/grpcService/pkg/errors"
 	service "github.com/timoteoBone/project-microservice/grpcService/pkg/user"
 	"github.com/timoteoBone/project-microservice/grpcService/pkg/utils"
 )
@@ -85,21 +84,6 @@ func TestServiceCreateUser(t *testing.T) {
 			ServiceResponse: Succesfullresponse,
 			Error:           nil,
 		},
-
-		{
-			Name:       "Create User Empty Fields",
-			Identifier: "CreateUser",
-			User:       entities.User{Pass: "sdsd"},
-			Request:    entities.CreateUserRequest{Pass: "sdsd"},
-			RepoError:  err.ErrAllFieldsRequired,
-			RepoId:     userId,
-			ServiceResponse: entities.CreateUserResponse{
-				Status: entities.Status{
-					Message: "Unable to create user",
-				},
-			},
-			Error: errors.ErrAllFieldsRequired,
-		},
 	}
 
 	repo := utils.NewRepoMock(logger, mock.Mock{})
@@ -120,7 +104,7 @@ func TestServiceCreateUser(t *testing.T) {
 
 }
 
-func TestServiceGetUser(t *testing.T) {
+func TestServiceGetExistingUser(t *testing.T) {
 
 	var logger log.Logger
 	{
@@ -156,49 +140,44 @@ func TestServiceGetUser(t *testing.T) {
 
 	ctx := context.Background()
 
-	testCases := []struct {
-		Name                    string
-		Identifier              string
-		UserId                  string
-		Request                 entities.GetUserRequest
-		RepoReturn              entities.User
-		RepoError               error
-		ServiceExpectedResponse entities.GetUserResponse
-		Error                   error
-	}{
-		{
-			Name:                    "Get User Valid Request",
-			Identifier:              "GetUser",
-			UserId:                  userId,
-			Request:                 correctGetUserRequest,
-			RepoReturn:              user,
-			RepoError:               nil,
-			ServiceExpectedResponse: correctGetUserResponse,
-			Error:                   nil,
-		},
+	repo.Mock.On("GetUser", ctx, userId).Return(user, nil)
 
-		{
-			Name:                    "Get User Not Found",
-			Identifier:              "GetUser",
-			UserId:                  userId,
-			Request:                 correctGetUserRequest,
-			RepoReturn:              entities.User{},
-			RepoError:               errors.ErrUserNotFound,
-			ServiceExpectedResponse: entities.GetUserResponse{},
-			Error:                   errors.ErrUserNotFound,
-		},
+	res, err := srvc.GetUser(ctx, correctGetUserRequest)
+	assert.Equal(t, correctGetUserResponse, res)
+	assert.ErrorIs(t, err, nil)
+
+}
+
+func TestServiceGetNonExistingUser(t *testing.T) {
+
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.NewSyncLogger(logger)
+		logger = log.With(logger,
+			"service", "grpcUserService",
+			"time:", log.DefaultTimestampUTC,
+			"caller", log.DefaultCaller,
+		)
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.Name, func(t *testing.T) {
-			repo.Mock.On(tc.Identifier, ctx, tc.UserId).Return(tc.RepoReturn, tc.RepoError)
+	userId := utils.GenerateId()
 
-			res, err := srvc.GetUser(ctx, tc.Request)
-			assert.Equal(t, tc.ServiceExpectedResponse, res)
-			assert.ErrorIs(t, err, tc.Error)
-
-		})
+	correctGetUserRequest := entities.GetUserRequest{
+		UserID: userId,
 	}
+
+	expectedErr := errors.NewUserNotFound()
+
+	repo := new(utils.RepoSitoryMock)
+	srvc := service.NewService(logger, repo)
+	ctx := context.Background()
+
+	repo.Mock.On("GetUser", ctx, userId).Return(entities.User{}, expectedErr)
+
+	res, err := srvc.GetUser(ctx, correctGetUserRequest)
+	assert.Equal(t, entities.GetUserResponse{}, res)
+	assert.ErrorIs(t, err, expectedErr)
 
 }
 

@@ -38,8 +38,11 @@ func (repo *RepoSitoryMock) CreateUser(ctx context.Context, user entities.User) 
 
 func (repo *RepoSitoryMock) GetUser(ctx context.Context, userId string) (entities.User, error) {
 	args := repo.Called(ctx, userId)
-	id := args[0]
 
-	return id.(entities.User), nil
+	return args.Get(0).(entities.User), args.Error(1)
 
+}
+
+func (repo *RepoSitoryMock) AuthenticateUser(ctx context.Context, email string) (string, error) {
+	return "nil", nil
 }

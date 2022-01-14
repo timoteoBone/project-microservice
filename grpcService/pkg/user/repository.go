@@ -23,7 +23,7 @@ func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (string
 
 	repo.Logger.Log(repo.Logger, "Repository method", "Create user")
 
-	stmt, err := repo.DB.Prepare(utils.CreateUser)
+	stmt, err := repo.DB.PrepareContext(ctx, utils.CreateUser)
 	if err != nil {
 		level.Error(repo.Logger).Log(err)
 		return "", err
@@ -31,7 +31,7 @@ func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (string
 
 	newId := utils.GenerateId()
 
-	res, err := stmt.Exec(user.Name, newId, user.Age, user.Pass)
+	res, err := stmt.ExecContext(ctx, user.Name, newId, user.Pass, user.Age, user.Email)
 	if err != nil {
 		level.Error(repo.Logger).Log(err)
 		return "", err
@@ -45,7 +45,12 @@ func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (string
 func (repo *sqlRepo) GetUser(ctx context.Context, userId string) (entities.User, error) {
 
 	user := entities.User{}
-	err := repo.DB.QueryRow(utils.GetUser, userId).Scan(&user.Name, &user.Age)
+	stmt, err := repo.DB.PrepareContext(ctx, utils.GetUser)
+	if err != nil {
+		level.Error(repo.Logger).Log(err)
+		return entities.User{}, err
+	}
+	err = stmt.QueryRowContext(ctx, utils.GetUser).Scan(&user.Name, &user.Age, &user.Email)
 	if err != nil {
 		return entities.User{}, err
 	}

@@ -11,11 +11,6 @@ import (
 	pb "github.com/timoteoBone/project-microservice/grpcService/pkg/pb"
 )
 
-type CustomError interface {
-	Error() string
-	StatusCode() int
-}
-
 type UserNotFoundErr struct {
 	err error
 }
@@ -84,6 +79,38 @@ func (err UserNotFoundErr) GRPCStatus() *status.Status {
 	return status.New(codes.NotFound, err.Error())
 }
 
+func (err DeniedAuthentication) StatusCode() int {
+	return http.StatusUnauthorized
+}
+
+func (err DeniedAuthentication) GRPCStatus() *status.Status {
+	return status.New(codes.PermissionDenied, err.Error())
+}
+
+func (err FieldsMissingErr) StatusCode() int {
+	return http.StatusBadRequest
+}
+
+func (err FieldsMissingErr) GRPCStatus() *status.Status {
+	return status.New(codes.InvalidArgument, err.Error())
+}
+
+func (err DataBaseErr) StatusCode() int {
+	return http.StatusInternalServerError
+}
+
+func (err DataBaseErr) GRPCStatus() *status.Status {
+	return status.New(codes.Aborted, err.Error())
+}
+
+func (err GrpcErr) StatusCode() int {
+	return http.StatusInternalServerError
+}
+
+func (err GrpcErr) GRPCStatus() *status.Status {
+	return status.New(codes.Internal, err.Error())
+}
+
 func CustomToGrpc(err error) *pb.Status {
 	var status pb.Status
 	switch err.(type) {
@@ -129,6 +156,8 @@ func CustomToHttp(err error) int {
 		return http.StatusNotFound
 	case FieldsMissingErr:
 		return http.StatusBadRequest
+	case DeniedAuthentication:
+		return http.StatusUnauthorized
 	default:
 		return http.StatusInternalServerError
 	}

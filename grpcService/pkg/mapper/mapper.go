@@ -8,6 +8,7 @@ func CreateUserRequestToUser(userReq entities.CreateUserRequest) entities.User {
 		userReq.Name,
 		userReq.Pass,
 		userReq.Age,
+		userReq.Email,
 	}
 	return user
 }
