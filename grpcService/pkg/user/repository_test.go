@@ -65,9 +65,10 @@ func TestCreateUser(t *testing.T) {
 			Name:       "Create User Valid Case",
 			Identifier: "CreateUser",
 			User: entities.User{
-				Name: "Timo",
-				Age:  19,
-				Pass: "1234",
+				Name:  "Timo",
+				Age:   19,
+				Pass:  "1234",
+				Email: "timoteo@globant.com",
 			},
 			UserID:            userId,
 			Query:             "INSERT INTO USER (first_name, id, age, pass) VALUES (?,?,?,?)",
@@ -81,9 +82,9 @@ func TestCreateUser(t *testing.T) {
 			ctx := context.Background()
 
 			prep := mock.ExpectPrepare(tc.Query)
-			prep.ExpectExec().WithArgs(tc.User.Name, tc.UserID, tc.User.Age, tc.User.Pass).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
+			prep.ExpectExec().WithArgs(tc.User.Name, userId, tc.User.Pass, tc.User.Age, tc.User.Email).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
 
-			_, err := repo.CreateUser(ctx, tc.User)
+			_, err := repo.CreateUser(ctx, tc.User, userId)
 			assert.NoError(t, err)
 		})
 	}
@@ -134,14 +135,29 @@ func TestGetUser(t *testing.T) {
 				assert.Equal(t, userMock.Email, resp.Email)
 			},
 		},
+
+		{
+			Name:   "Get non existing user",
+			UserID: userId,
+			buildMock: func(mock sqlmock.Sqlmock, userId string) {
+				res := sqlmock.NewRows([]string{"first_name", "age", "email"})
+				mock.ExpectPrepare(utils.GetUser)
+				mock.ExpectQuery(utils.GetUser).WithArgs(userId).WillReturnRows(res)
+			},
+			assertResponse: func(t *testing.T, resp entities.User, err error) {
+				assert.Error(t, err)
+				assert.Empty(t, resp)
+			},
+		},
 	}
 
 	for _, tc := range testCases {
+
 		t.Run(tc.Name, func(t *testing.T) {
 			ctx := context.Background()
 			tc.buildMock(mock, userId)
 
-			res, err := repo.GetUser(ctx, userId)
+			res, err := repo.GetUser(ctx, tc.UserID)
 			tc.assertResponse(t, res, err)
 		})
 	}

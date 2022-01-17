@@ -30,7 +30,7 @@ func NewRepoMock(logger log.Logger, mock mock.Mock) RepoSitoryMock {
 	return RepoSitoryMock{Mock: mock, logger: logger}
 }
 
-func (repo *RepoSitoryMock) CreateUser(ctx context.Context, user entities.User) (string, error) {
+func (repo *RepoSitoryMock) CreateUser(ctx context.Context, user entities.User, userId string) (string, error) {
 	args := repo.Called(ctx, user)
 
 	return (args.String(0)), args.Error(1)

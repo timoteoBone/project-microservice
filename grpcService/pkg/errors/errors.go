@@ -31,6 +31,10 @@ type DeniedAuthentication struct {
 	err error
 }
 
+type UserAlreadyExists struct {
+	err error
+}
+
 func (err FieldsMissingErr) Error() string {
 	return fmt.Sprint(err.err)
 }
@@ -48,6 +52,10 @@ func (err DataBaseErr) Error() string {
 }
 
 func (err DeniedAuthentication) Error() string {
+	return fmt.Sprint(err.err)
+}
+
+func (err UserAlreadyExists) Error() string {
 	return fmt.Sprint(err.err)
 }
 
@@ -69,6 +77,10 @@ func NewDataBaseError() DataBaseErr {
 
 func NewDeniedAuthentication() DeniedAuthentication {
 	return DeniedAuthentication{err: errors.New("password is incorrect")}
+}
+
+func NewUserAlreadyExists() UserAlreadyExists {
+	return UserAlreadyExists{err: errors.New("user already exists in database")}
 }
 
 func (err UserNotFoundErr) StatusCode() int {
@@ -109,6 +121,14 @@ func (err GrpcErr) StatusCode() int {
 
 func (err GrpcErr) GRPCStatus() *status.Status {
 	return status.New(codes.Internal, err.Error())
+}
+
+func (err UserAlreadyExists) StatusCode() int {
+	return http.StatusConflict
+}
+
+func (err UserAlreadyExists) GRPCStatus() *status.Status {
+	return status.New(codes.AlreadyExists, err.Error())
 }
 
 func CustomToGrpc(err error) *pb.Status {

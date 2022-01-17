@@ -45,6 +45,55 @@ func TestServiceCreateUser(t *testing.T) {
 	}
 
 	user := entities.User{
+		Name:  "Timo",
+		Pass:  "123",
+		Age:   19,
+		Email: "timoteo@globant.com",
+	}
+
+	userId := utils.GenerateId()
+
+	correctCreateUserRequest := entities.CreateUserRequest{
+		Name:  user.Name,
+		Pass:  user.Pass,
+		Age:   user.Age,
+		Email: user.Email,
+	}
+
+	Succesfullresponse := entities.CreateUserResponse{
+		Status: entities.Status{
+			Message: "created successfully",
+		}, UserId: userId,
+	}
+
+	repo := utils.NewRepoMock(logger, mock.Mock{})
+	srvc := service.NewService(logger, &repo)
+
+	t.Run("Create User Valid case", func(t *testing.T) {
+		ctx := context.Background()
+		repo.On("CreateUser", ctx, user).Return(userId, nil)
+
+		res, err := srvc.CreateUser(ctx, correctCreateUserRequest)
+		assert.ErrorIs(t, err, nil)
+		assert.Equal(t, Succesfullresponse, res)
+
+	})
+
+}
+
+func TestServiceCreateExistingUser(t *testing.T) {
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.NewSyncLogger(logger)
+		logger = log.With(logger,
+			"service", "grpcUserService",
+			"time:", log.DefaultTimestampUTC,
+			"caller", log.DefaultCaller,
+		)
+	}
+
+	user := entities.User{
 		Name: "Timo",
 		Pass: "123",
 		Age:  19,
@@ -58,49 +107,18 @@ func TestServiceCreateUser(t *testing.T) {
 		Age:  user.Age,
 	}
 
-	Succesfullresponse := entities.CreateUserResponse{
-		Status: entities.Status{
-			Message: "created successfully",
-		}, UserId: userId,
-	}
-
-	testsCases := []struct {
-		Name            string
-		Identifier      string
-		User            entities.User
-		Request         entities.CreateUserRequest
-		RepoError       error
-		RepoId          string
-		ServiceResponse entities.CreateUserResponse
-		Error           error
-	}{
-		{
-			Name:            "Create User Valid Case",
-			Identifier:      "CreateUser",
-			User:            user,
-			Request:         correctCreateUserRequest,
-			RepoError:       nil,
-			RepoId:          userId,
-			ServiceResponse: Succesfullresponse,
-			Error:           nil,
-		},
-	}
-
 	repo := utils.NewRepoMock(logger, mock.Mock{})
 	srvc := service.NewService(logger, &repo)
 
-	for _, tc := range testsCases {
-		t.Run(tc.Name, func(t *testing.T) {
-			ctx := context.Background()
-			repo.On(tc.Identifier, ctx, tc.User).Return((tc.RepoId), tc.RepoError)
+	t.Run("Create User Valid case", func(t *testing.T) {
+		ctx := context.Background()
+		repo.On("CreateUser", ctx, user).Return(userId, nil)
 
-			res, err := srvc.CreateUser(ctx, tc.Request)
-			assert.ErrorIs(t, err, tc.RepoError)
-			assert.Equal(t, tc.ServiceResponse, res)
+		res, err := srvc.CreateUser(ctx, correctCreateUserRequest)
+		assert.ErrorIs(t, err, errors.NewUserAlreadyExists())
+		assert.Empty(t, res)
 
-		})
-
-	}
+	})
 
 }
 

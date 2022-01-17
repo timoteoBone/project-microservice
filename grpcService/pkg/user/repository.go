@@ -19,7 +19,7 @@ func NewSQL(db *sql.DB, log log.Logger) *sqlRepo {
 	return &sqlRepo{db, log}
 }
 
-func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (string, error) {
+func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User, newId string) (string, error) {
 
 	repo.Logger.Log(repo.Logger, "Repository method", "Create user")
 
@@ -29,8 +29,7 @@ func (repo *sqlRepo) CreateUser(ctx context.Context, user entities.User) (string
 		return "", err
 	}
 
-	newId := utils.GenerateId()
-
+	defer stmt.Close()
 	res, err := stmt.ExecContext(ctx, user.Name, newId, user.Pass, user.Age, user.Email)
 	if err != nil {
 		level.Error(repo.Logger).Log(err)
@@ -50,8 +49,12 @@ func (repo *sqlRepo) GetUser(ctx context.Context, userId string) (entities.User,
 		level.Error(repo.Logger).Log(err)
 		return entities.User{}, err
 	}
-	err = stmt.QueryRowContext(ctx, utils.GetUser).Scan(&user.Name, &user.Age, &user.Email)
+
+	defer stmt.Close()
+
+	err = stmt.QueryRowContext(ctx, userId).Scan(&user.Name, &user.Age, &user.Email)
 	if err != nil {
+		level.Error(repo.Logger).Log(err)
 		return entities.User{}, err
 	}
 

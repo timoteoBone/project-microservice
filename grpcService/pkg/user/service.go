@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/google/uuid"
 
 	entities "github.com/timoteoBone/project-microservice/grpcService/pkg/entities"
 	errors "github.com/timoteoBone/project-microservice/grpcService/pkg/errors"
@@ -16,7 +17,7 @@ import (
 
 type Repository interface {
 	GetUser(ctx context.Context, userId string) (entities.User, error)
-	CreateUser(ctx context.Context, user entities.User) (string, error)
+	CreateUser(ctx context.Context, user entities.User, newId string) (string, error)
 	AuthenticateUser(ctx context.Context, email string) (string, error)
 }
 
@@ -36,13 +37,12 @@ func (s *service) CreateUser(ctx context.Context, userReq entities.CreateUserReq
 	status := entities.Status{}
 
 	user := mapper.CreateUserRequestToUser(userReq)
-	genId, err := s.Repo.CreateUser(ctx, user)
+	newId := generateId()
+	genId, err := s.Repo.CreateUser(ctx, user, newId)
 
 	if err != nil {
-		status.Message = "Unable to create user"
-		status.Code = 10
-		response.Status = status
-		return response, errors.NewDataBaseError()
+		level.Error(s.Logger).Log("error", err)
+		return entities.CreateUserResponse{}, errors.NewDataBaseError()
 	}
 
 	status.Message = "created successfully"
@@ -58,8 +58,10 @@ func (s *service) GetUser(ctx context.Context, user entities.GetUserRequest) (en
 	res, err := s.Repo.GetUser(ctx, user.UserID)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			level.Error(s.Logger).Log("error", err)
 			return entities.GetUserResponse{}, errors.NewUserNotFound()
 		}
+		level.Error(s.Logger).Log("error", err)
 		return entities.GetUserResponse{}, err
 	}
 
@@ -92,4 +94,8 @@ func (s *service) AuthenticateUser(ctx context.Context, rq entities.Authenticate
 	resp := entities.AuthenticateResponse{Status: entities.Status{Message: "authenticated succesfully", Code: 0}}
 
 	return resp, nil
+}
+
+func generateId() string {
+	return uuid.NewString()
 }
