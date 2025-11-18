@@ -74,3 +74,32 @@ func (repo *grpcClient) GetUser(ctx context.Context, rq entities.GetUserRequest)
 
 	return resp, nil
 }
+
+func (repo *grpcClient) Authenticate(ctx context.Context, rq entities.AuthenticateRequest) (entities.AuthenticateResponse, error) {
+	logger := log.With(repo.logger, "authenticate user", "received")
+
+	client := proto.NewUserServiceClient(repo.server)
+
+	protoReq := proto.AuthenticateRequest{
+		Email: rq.Email,
+		Pass:  rq.Pass,
+	}
+
+	protoRes, err := client.Authenticate(ctx, &protoReq)
+
+	if err != nil {
+		level.Error(logger).Log("error", err.Error())
+		return entities.AuthenticateResponse{}, err
+	}
+
+	status := entities.Status{
+		Message: protoRes.Status.Message,
+		Code:    protoRes.Status.Code,
+	}
+
+	resp := entities.AuthenticateResponse{
+		Status: status,
+	}
+
+	return resp, nil
+}

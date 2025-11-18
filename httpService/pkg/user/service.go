@@ -12,6 +12,7 @@ import (
 type Repository interface {
 	CreateUser(ctx context.Context, rq entities.CreateUserRequest) (entities.CreateUserResponse, error)
 	GetUser(ctx context.Context, rq entities.GetUserRequest) (entities.GetUserResponse, error)
+	Authenticate(ctx context.Context, rq entities.AuthenticateRequest) (entities.AuthenticateResponse, error)
 }
 
 type service struct {
@@ -46,6 +47,18 @@ func (s *service) GetUser(ctx context.Context, rq entities.GetUserRequest) (enti
 	if err != nil {
 		level.Error(logger).Log("error", err.Error())
 		return entities.GetUserResponse{}, err
+	}
+
+	return res, nil
+}
+
+func (s *service) Authenticate(ctx context.Context, rq entities.AuthenticateRequest) (entities.AuthenticateResponse, error) {
+	logger := log.With(s.Logger, "authenticate user request", "recevied")
+
+	res, err := s.Repo.Authenticate(ctx, rq)
+	if err != nil {
+		level.Error(logger).Log("error", err.Error())
+		return entities.AuthenticateResponse{}, err
 	}
 
 	return res, nil

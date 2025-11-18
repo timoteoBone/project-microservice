@@ -10,8 +10,9 @@ type DomainError struct {
 }
 
 var (
-	ErrInvalidDataForm error = NewError("invalid data type or form")
-	ErrUserNotFound    error = NewError("user not found")
+	ErrInvalidDataForm       error = NewError("invalid data type or form")
+	ErrUserNotFound          error = NewError("user not found")
+	ErrDeniedAuthentication  error = NewError("denied authentication")
 )
 
 func NewError(message string) DomainError {

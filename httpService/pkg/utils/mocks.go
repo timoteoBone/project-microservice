@@ -30,3 +30,10 @@ func (repo *RepositoryMock) GetUser(ctx context.Context, rq entities.GetUserRequ
 	return response.(entities.GetUserResponse), args.Error(1)
 
 }
+
+func (repo *RepositoryMock) Authenticate(ctx context.Context, rq entities.AuthenticateRequest) (entities.AuthenticateResponse, error) {
+	args := repo.Mock.Called(ctx, rq)
+	response := args[0]
+
+	return response.(entities.AuthenticateResponse), args.Error(1)
+}
