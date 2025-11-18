@@ -172,3 +172,63 @@ func TestGetUserCreate(t *testing.T) {
 	}
 
 }
+
+func TestAuthenticate(t *testing.T) {
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.NewSyncLogger(logger)
+		logger = log.With(logger,
+			"service", "grpcUserService",
+			"time:", log.DefaultTimestampUTC,
+			"caller", log.DefaultCaller,
+		)
+	}
+
+	repo := util.NewRepositoryMock()
+
+	srvc := user.NewService(&repo, logger)
+
+	var (
+		correctAuthRequest entities.AuthenticateRequest = entities.AuthenticateRequest{
+			Email: "test@example.com",
+			Pass:  "password123",
+		}
+
+		correctAuthResponse entities.AuthenticateResponse = entities.AuthenticateResponse{
+			Status: entities.Status{
+				Message: "authenticated succesfully",
+				Code:    0,
+			},
+		}
+	)
+
+	testCases := []struct {
+		Name       string
+		Identifier string
+		Request    entities.AuthenticateRequest
+		Response   entities.AuthenticateResponse
+		Error      error
+	}{
+		{
+			Name:       "Authenticate Valid Case",
+			Identifier: "Authenticate",
+			Request:    correctAuthRequest,
+			Response:   correctAuthResponse,
+			Error:      nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.Name, func(t *testing.T) {
+			ctx := context.Background()
+			repo.On(tc.Identifier, ctx, tc.Request).Return(tc.Response, tc.Error)
+
+			res, err := srvc.Authenticate(ctx, tc.Request)
+			assert.Equal(t, tc.Response, res)
+			assert.ErrorIs(t, err, tc.Error)
+
+		})
+	}
+
+}

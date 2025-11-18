@@ -27,6 +27,12 @@ func NewHTTPSrv(endpoint Endpoints) http.Handler {
 		encodeGetUserResp,
 	))
 
+	rt.Methods("POST").Path("/authenticate").Handler(httptransport.NewServer(
+		endpoint.Authenticate,
+		decodeAuthenticateReq,
+		encodeAuthenticateResp,
+	))
+
 	return rt
 }
 
@@ -59,5 +65,19 @@ func decodeGetUserReq(ctx context.Context, r *http.Request) (interface{}, error)
 
 func encodeGetUserResp(ctx context.Context, wr http.ResponseWriter, response interface{}) error {
 
+	return json.NewEncoder(wr).Encode(response)
+}
+
+func decodeAuthenticateReq(ctx context.Context, r *http.Request) (interface{}, error) {
+	var request entities.AuthenticateRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		return nil, myerr.ErrInvalidDataForm
+	}
+
+	return request, nil
+}
+
+func encodeAuthenticateResp(ctx context.Context, wr http.ResponseWriter, response interface{}) error {
 	return json.NewEncoder(wr).Encode(response)
 }
